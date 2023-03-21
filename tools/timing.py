@@ -1,18 +1,13 @@
 import schedule 
 from retrieval import checkNew, loginAndSelect
-from db_manipulation import package_post
+from package_post import post
 
 tasksForDailyReport = []
 
 def getPostNewMail():
-    mail = checkNew(loginAndSelect())
-    if mail: 
-        queries = package_post.package(mail)
-        didPost = package_post.post(queries)
-        if didPost:
-            print("Successfully posted tasks to the database.")
-        else:
-            print("Failed to post the new emails found.")
+    didPost = post()
+    if didPost: 
+        print("Successfully posted tasks to the database.")
     else:
         print("No new mail to post at this time.)")
 

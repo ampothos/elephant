@@ -1,16 +1,15 @@
 import psycopg2
-from retrieval import loginAndSelect, checkNew, parseEmails
+from retrieval import parseEmails
 from dbconnect import connect
 import uuid
 import datetime
 from dbconnect import connect
 
+# get new emails and wrap them in queries for the database
 def package():
-    imap = loginAndSelect()
-    msgs = parseEmails(checkNew(imap), imap)
-    imap.close()
+    msgs = parseEmails()
     queries = []
-    if len(msgs) > 0:
+    if msgs and len(msgs) > 0:
         print("There are new task occurrences! Uploading now.")
 
         conn = connect()
@@ -35,19 +34,24 @@ def package():
         cursor.close()
         conn.close()
         return queries
+    else:
+        print("There are no new messages at this time.")
 
 def post():
     # execute multiple queries to post 
     # return True or False for worked or not 
     queries = package()
-    conn = connect()
-    cursor = conn.cursor() 
-    for query in queries: 
-        cursor.execute(query[0], query[1])
-        conn.commit()
-    # data = cursor.fetchone()
-    # print(data)
-    cursor.close()
-    conn.close()
-    
-post()
+    if queries: 
+        conn = connect()
+        cursor = conn.cursor() 
+        
+        for query in queries: 
+            cursor.execute(query[0], query[1])
+            conn.commit()
+        # data = cursor.fetchone()
+        # print(data)
+        cursor.close()
+        conn.close()
+        return True
+    else:
+        return False

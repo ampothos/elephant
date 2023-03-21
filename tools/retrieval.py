@@ -57,13 +57,9 @@ def checkNew(imap):
                 messagedate = datetime.datetime.strptime(message.get('Date'), "%a, %d %b %Y %H:%M:%S %z")
                 messagedate = messagedate.replace(tzinfo=None)
                 dif = messagedate - date
-                print(dif.total_seconds())
                 if int(dif.total_seconds()) > 0:
-                    print(dif.total_seconds())
-                
-                
-
-            
+                    newMessageNums.append(m)
+      
         return newMessageNums
        
     else:
@@ -76,26 +72,31 @@ def checkNew(imap):
 # creates uuid for the occurrence
 # creates object for each task, later used to create an insert query
 # returns list of objects
-def parseEmails(msgnums, imap): 
-    tasks = []
-    for num in msgnums:
-        typ, data = imap.fetch(num, '(RFC822)')
-        if typ == "OK":
-            message = email.message_from_bytes(data[0][1])
-            u = uuid.uuid4()
-            date = datetime.datetime.strptime(message.get('Date'), "%a, %d %b %Y %X %z")
-            date = date.replace(tzinfo=None)
-            item = {"uuid" : u,
-                    "when" : date.replace(tzinfo=None).strftime("%Y-%m-%d %X"),
-                    "task" : message.get('Subject')}
+def parseEmails(): 
+    
+    imap = loginAndSelect()
+    msgnums= checkNew(imap)
+    if msgnums:
+        tasks = []
+        for num in msgnums:
+            typ, data = imap.fetch(num, '(RFC822)')
+            if typ == "OK":
+                message = email.message_from_bytes(data[0][1])
+                u = uuid.uuid4()
+                date = datetime.datetime.strptime(message.get('Date'), "%a, %d %b %Y %X %z")
+                date = date.replace(tzinfo=None)
+                item = {"uuid" : u,
+                        "when" : date.replace(tzinfo=None).strftime("%Y-%m-%d %X"),
+                        "task" : message.get('Subject')}
 
-            tasks.append(item)
-        else:
-            print(f"Error: {typ}")
+                tasks.append(item)
+            else:
+                print(f"Error: {typ}")
+        return tasks
+    else:
+        return False
 
-    return tasks
-imap= loginAndSelect()
-d = checkNew(imap)
-imap.close()
-print(d)
+    
+
+
 
