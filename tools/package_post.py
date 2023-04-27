@@ -1,9 +1,9 @@
 import psycopg2
 from retrieval import parseEmails
-from dbconnect import connect
+from database_management.dbconnect import connect
 import uuid
 import datetime
-from dbconnect import connect
+from database_management.dbconnect import connect
 
 # get new emails and wrap them in queries for the database
 def package():
@@ -29,7 +29,6 @@ def package():
                 query = """INSERT INTO task_instance VALUES (%s, %s, %s, %s, %s);""", [instance_uuid, m['when'], id, "", description_datetime]
 
                 queries.append(query) 
-                print(query)
 
         cursor.close()
         conn.close()

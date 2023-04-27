@@ -2,7 +2,7 @@ import email
 import imaplib
 import uuid
 import datetime
-from dbconnect import connect
+from database_management.dbconnect import connect
 
 # return connection object
 def loginAndSelect():
@@ -18,6 +18,15 @@ def loginAndSelect():
 
 def imapifyDate(date):
     return date.strftime("%d-%b-%Y")
+
+def strptimeEmail(message):
+    try:
+        messagedate = datetime.datetime.strptime(message.get('Date'), "%a, %d %b %Y %H:%M:%S %z")
+    except: 
+        messagedate = datetime.datetime.strptime(message.get('Date'), "%a, %d %b %Y %H:%M:%S %Z")
+    finally:
+        messagedate = messagedate.replace(tzinfo=None)
+        return messagedate
 
 def postgresifyDateTime(date):
     return date.replace(tzinfo=None).strftime("%Y-%m-%d %X")
@@ -54,12 +63,13 @@ def checkNew(imap):
             typ, data = imap.fetch(m, '(RFC822)')
             if typ == "OK":
                 message = email.message_from_bytes(data[0][1])
-                messagedate = datetime.datetime.strptime(message.get('Date'), "%a, %d %b %Y %H:%M:%S %z")
-                messagedate = messagedate.replace(tzinfo=None)
+                print(message.get('Date'))
+                # produce a datetime object
+                messagedate = strptimeEmail(message)
                 dif = messagedate - date
                 if int(dif.total_seconds()) > 0:
                     newMessageNums.append(m)
-      
+        
         return newMessageNums
        
     else:
@@ -83,8 +93,9 @@ def parseEmails():
             if typ == "OK":
                 message = email.message_from_bytes(data[0][1])
                 u = uuid.uuid4()
-                date = datetime.datetime.strptime(message.get('Date'), "%a, %d %b %Y %X %z")
-                date = date.replace(tzinfo=None)
+                # turn the message date into a datetime object
+                date = strptimeEmail(message)
+                # construct the task item 
                 item = {"uuid" : u,
                         "when" : date.replace(tzinfo=None).strftime("%Y-%m-%d %X"),
                         "task" : message.get('Subject')}
