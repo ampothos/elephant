@@ -2,7 +2,7 @@ import email
 import imaplib
 import uuid
 import datetime
-from database_management.dbconnect import connect
+from database_management.connectDb import connect
 
 # return connection object
 def loginAndSelect():

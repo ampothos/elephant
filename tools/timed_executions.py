@@ -5,6 +5,7 @@ import datetime
 from smtplib import SMTP_SSL, SMTP_SSL_PORT
 from email.message import EmailMessage
 from make_email import makeSendEmail
+import math
 
 tasksForDailyReport = []
 
@@ -41,7 +42,7 @@ def checkIntervalLapsesAndNotify():
                 # blanket add task to daily report of tasks overdue 
                 tasksForDailyReport.append({"item" : task,
                                             "interval" : item["interval"],
-                                            "timeSince" : howLongSinceLast }) 
+                                            "timeSince" : howLongSinceLast}) 
                 # for attendance, make sure it is not the weekend
                 if item["criticality"] == 2:
                     # if it's been double time interval, move to criticality 3
@@ -51,11 +52,12 @@ def checkIntervalLapsesAndNotify():
                     from_email = "elephantclient1@gmail.com"
                     to_email = "thewateringholesender@gmail.com"
 
-                    maildict = {'from_email' : from_email,
-                                'to_email': to_email, 
-                                'subject' : task,
-                                'body' : body,
-                                'from_pass' : 'evatdawaocuiaief'}
+                    maildict = {"from_email" : from_email,
+                                "to_email": to_email, 
+                                "subject" : "DO " + task + " " + howLongSinceLast,
+                                "body" : body,
+                                "from_pass" : 'evatdawaocuiaief'}
+                    
                     # create an email with the task as the subject for interval breach alert 
                     makeSendEmail(maildict)
 
@@ -80,3 +82,4 @@ def checkIntervalLapsesAndNotify():
 # schedule.every().hour.at(":20").do(getPostNewMail)
 # schedule.every().hour.at(":30").do(checkIntervalLapsesAndNotify)
 getPostNewMail()
+checkIntervalLapsesAndNotify()

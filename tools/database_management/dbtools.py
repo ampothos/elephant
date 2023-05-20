@@ -1,6 +1,7 @@
-from dbconnect import connect
+from .connectDb import connect
 import psycopg2
 
+# return newest task from instance table 
 def selectNewestByTaskId(id):
     conn = connect()
     cursor = conn.cursor()
@@ -14,6 +15,7 @@ def selectNewestByTaskId(id):
     conn.close()
     return result
 
+# return 1 task blueprint row by task id
 def selectByTaskId(taskId): 
     conn = connect() 
     cursor = conn.cursor()
@@ -27,6 +29,7 @@ def selectByTaskId(taskId):
 
     return result[0][0]
 
+# returns all task blueprints from task table 
 def selectAllTasks():
     conn = connect()
 
@@ -41,6 +44,8 @@ def selectAllTasks():
     conn.close()
     return result
 
+# returns all instances from task_instance table in a list
+# [id, taskId, name, datetime]
 def showTaskInstanceTable(): 
     conn = connect() 
     cursor = conn.cursor() 
@@ -60,4 +65,16 @@ def showTaskInstanceTable():
     for instance in instances: 
         print(f"{instance[2]}, {instance[3]}")
     return instances
+
+def deleteTaskInstance(id): 
+    conn = connect() 
+    cursor = conn.cursor() 
+
+    query = """DELETE FROM task_instance WHERE task_id=%s RETURNING *"""
+    cursor.execute(query, id)
+    deleted = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+    return deleted
 

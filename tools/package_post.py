@@ -1,9 +1,9 @@
 import psycopg2
 from retrieval import parseEmails
-from database_management.dbconnect import connect
+from database_management.connectDb import connect
 import uuid
 import datetime
-from database_management.dbconnect import connect
+from database_management.connectDb import connect
 
 # get new emails and wrap them in queries for the database
 def package():
